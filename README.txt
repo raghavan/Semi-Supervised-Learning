@@ -7,3 +7,6 @@ To run the program place the feature vector file in the sklearn_mode/files/.
 cd sklearn_model/python
 
 run python datamodeller <trainingfile> <testingfile> <traininglabel> 
+
+
+To more about EM http://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm
