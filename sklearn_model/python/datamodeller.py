@@ -30,7 +30,14 @@ def pearsonr(x, y):
 def doSVM(xTrain,yTrain,xTest):
     clf = svm.SVC(C=12.0,kernel='rbf',probability=True,shrinking=True);
     clf.fit(xTrain, yTrain);
-    print "SVM1 Mean Accuracy score = ",cross_val_score(clf,xTrain,yTrain).mean();
+    print "SVM1 Mean Accuracy score = ",cross_val_score(clf,xTrain,yTrain).mean();    
+    yPredSVM = clf.predict(xTest);
+    return yPredSVM;   
+
+def doLR(xTrain,yTrain,xTest):
+    clf = linear_model.LogisticRegression();
+    clf.fit(xTrain, yTrain);
+    print "LR Mean Accuracy score = ",cross_val_score(clf,xTrain,yTrain).mean();
     yPredSVM = clf.predict(xTest);
     return yPredSVM;                        
                            
@@ -55,6 +62,7 @@ class DataModeller:
 
         
         yPredSVM1 = doSVM(xTrain[:,0:20], yTrain, xTest[:,0:20]);
+        #yPredSVM2 = doLR(xTrain, yTrain, xTest);
         yPredSVM2 = doSVM(xTrain[:,20:40], yTrain, xTest[:,20:40]);
         
         
@@ -86,8 +94,7 @@ class DataModeller:
         xTrainNew = np.concatenate((xTrainNew,xTrain))
         yTrainNew = np.concatenate((yTrainNew,yTrain))
 
-        yPredSVM3 = doSVM(xTrainNew[:,0:20], yTrainNew, xTestNew[:,0:20]);
-        yPredSVM4 = doSVM(xTrainNew[:,20:40], yTrainNew, xTestNew[:,20:40]);
+        yPredSVM3 = doSVM(xTrainNew, yTrainNew, xTest);
                                        
         outputFile = open("../files/final_classifiedvalues.csv", 'w+')
         for i in range(0,len(yPredSVM3)):
