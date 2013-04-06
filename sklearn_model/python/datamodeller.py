@@ -30,16 +30,23 @@ def pearsonr(x, y):
 def doSVM(xTrain,yTrain,xTest):
     clf = svm.SVC(C=12.0,kernel='rbf',probability=True,shrinking=True);
     clf.fit(xTrain, yTrain);
-    print "SVM1 Mean Accuracy score = ",cross_val_score(clf,xTrain,yTrain).mean();    
+    print "SVM Mean Accuracy score = ",cross_val_score(clf,xTrain,yTrain).mean();    
     yPredSVM = clf.predict(xTest);
-    return yPredSVM;   
+    return clf,yPredSVM;   
 
 def doLR(xTrain,yTrain,xTest):
     clf = linear_model.LogisticRegression();
     clf.fit(xTrain, yTrain);
     print "LR Mean Accuracy score = ",cross_val_score(clf,xTrain,yTrain).mean();
-    yPredSVM = clf.predict(xTest);
-    return yPredSVM;                        
+    yPredLR = clf.predict(xTest);
+    return clf,yPredLR;          
+
+def doRandomForst(xTrain,yTrain,xTest):
+    clf = RandomForestClassifier();
+    clf.fit(xTrain, yTrain);
+    print "Random forest Accuracy score = ",cross_val_score(clf,xTrain,yTrain).mean();
+    yPredLR = clf.predict(xTest);
+    return clf,yPredLR;               
                            
                            
 class DataModeller:
@@ -61,12 +68,58 @@ class DataModeller:
         
 
         
-        yPredSVM1 = doSVM(xTrain[:,0:20], yTrain, xTest[:,0:20]);
-        #yPredSVM2 = doLR(xTrain, yTrain, xTest);
-        yPredSVM2 = doSVM(xTrain[:,20:40], yTrain, xTest[:,20:40]);
+        clf1,yPredSVM1 = doSVM(xTrain[0:300,:], yTrain[0:300], xTest);
+        clf2,yPredSVM2 = doSVM(xTrain[300:600,:], yTrain[300:600], xTest);
+        clf3,yPredSVM3 = doSVM(xTrain[600:1000,:], yTrain[600:1000], xTest);
         
+        clflr1,yPredLR1 = doLR(xTrain[0:500,:], yTrain[0:500], xTest);
+
         
-        count=0;
+        clf,yPredSVM = doSVM(xTrain, yTrain, xTest);
+        
+        clf_rf_1,yPredRF1 = doRandomForst(xTrain, yTrain, xTest);
+        
+        outputFile = open("../files/final_boosted_classifiedvalues.csv", 'w+')
+        """Boosting technique"""
+        for i in range(0,len(xTest)):
+            count1 =0
+            count0 =0
+            if yPredSVM1[i] == 1:
+                count1+=1;
+            else:
+                count0+=1;
+            if yPredSVM2[i] == 1:
+                count1+=1;
+            else:
+                count0+=1;
+            if yPredSVM3[i] == 1:
+                count1+=1;
+            else:
+                count0+=1;
+            if yPredLR1[i] == 1:
+                count1+=1;
+            else:
+                count0+=1;
+            if yPredSVM[i] == 1:
+                count1 += 2;
+            else:
+                count0 += 2;
+            if yPredRF1[i] == 1:
+                count1 += 2;
+            else:
+                count0 += 2;                
+                
+                
+                
+            if count1 > count0 :
+                outputFile.write(str('1')+"\n")
+            else:
+                outputFile.write(str('0')+"\n")
+            
+        outputFile.close(); 
+        
+        #Applying Semi supervised technique 
+        """ count=0;
         for i in range(0,len(yPredSVM2)):
             if(yPredSVM1[i] == yPredSVM2[i]):
                 count+=1;                
@@ -77,7 +130,7 @@ class DataModeller:
         
         j=0;
         k=0;
-        count=0;
+        count=0;        
         for i in range(0,len(yPredSVM2)):
             if(yPredSVM1[i] == yPredSVM2[i]):
                 xTrainNew[j]=xTest[i];
@@ -94,12 +147,12 @@ class DataModeller:
         xTrainNew = np.concatenate((xTrainNew,xTrain))
         yTrainNew = np.concatenate((yTrainNew,yTrain))
 
-        yPredSVM3 = doSVM(xTrainNew, yTrainNew, xTest);
+        clf3,yPredSVM3 = doSVM(xTrainNew, yTrainNew, xTest);
                                        
         outputFile = open("../files/final_classifiedvalues.csv", 'w+')
         for i in range(0,len(yPredSVM3)):
              outputFile.write(str(int(yPredSVM3[i]))+"\n")            
-        outputFile.close(); 
+        outputFile.close(); """
 
  
 
